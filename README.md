@@ -1,1 +1,1 @@
-# -journey-three
+# journey-three
