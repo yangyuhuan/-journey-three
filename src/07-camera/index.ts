@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import gsap from 'gsap';
 import stats from '../common/stats';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 
 
 // Canvas
@@ -34,19 +34,11 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
 
-gsap.fromTo(
-  camera.position,
-  {
-    x: -1.5
-  },
-  {
-    x: 1.5,
-    duration: 1,
-    yoyo: true,
-    repeat: -1,
-    ease: 'sine.inOut',
-  },
-)
+
+//OrbitControls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true
+
 
 const tick = () => {
   stats.begin()

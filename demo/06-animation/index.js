@@ -57337,13 +57337,13 @@ var cube = new three__WEBPACK_IMPORTED_MODULE_1__.Mesh(new three__WEBPACK_IMPORT
 }));
 scene.add(cube);
 var camera = new three__WEBPACK_IMPORTED_MODULE_1__.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
-camera.position.set(1, 1, 1);
+camera.position.set(1, 1, 5);
 camera.lookAt(cube.position);
 var renderer = new three__WEBPACK_IMPORTED_MODULE_1__.WebGLRenderer({
   canvas: canvas
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
-gsap__WEBPACK_IMPORTED_MODULE_2__["default"].fromTo(cube.position, {
+gsap__WEBPACK_IMPORTED_MODULE_2__["default"].fromTo(camera.position, {
   x: -1.5
 }, {
   x: 1.5,
