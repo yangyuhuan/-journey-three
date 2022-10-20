@@ -57,7 +57,3 @@ const tick = () => {
 }
 
 tick()
-
-
-
-

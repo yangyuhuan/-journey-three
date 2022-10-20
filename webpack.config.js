@@ -6,10 +6,10 @@ const CopyPlugin = require('copy-webpack-plugin');
 const generateHtmlPlugins = () => glob.sync('./src/**/index.html').map(
   (item) => new htmlWebpackPlugin({
     template: item,
-    filename: `./${item.replace('/src','').replace('./','')}`,
+    filename: `./${item.replace('/src', '').replace('./', '')}`,
     inject: false,
     templateParameters: {
-      path: `.${item.replace('/src', '').replace('.html','.js')}`,
+      path: `.${item.replace('/src', '').replace('.html', '.js')}`,
     },
   }),
 )
