@@ -69,8 +69,11 @@ module.exports = {
         {
           from: "src/assets/**/*",
           to({ absoluteFilename }) {
-            const pathAndName = absoluteFilename.split("src/")[1];
-            return absoluteFilename;
+            const pathAndName = absoluteFilename
+              .split("src")[1]
+              .toString()
+              .slice(1);
+            return pathAndName;
           },
         },
       ],
