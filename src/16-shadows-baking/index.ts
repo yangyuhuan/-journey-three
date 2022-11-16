@@ -13,7 +13,7 @@ const scene = new THREE.Scene()
 
 // texture
 const textureLoader = new THREE.TextureLoader()
-const simpleShadow = textureLoader.load('../assets/textures/simpleShadow.jpg')
+const bakedShadow = textureLoader.load('../assets/textures/bakedShadow.jpg')
 
 /**
  *  objects
@@ -28,19 +28,14 @@ const sphere = new THREE.Mesh(new THREE.SphereGeometry(
   32,
 ), material)
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material)
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5),
+  new THREE.MeshBasicMaterial({
+    map: bakedShadow,
+  }))
 plane.rotation.set(-Math.PI / 2, 0, 0)
 plane.position.set(0, -0.5, 0)
 
-const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({
-  color: '#000000',
-  transparent: true,
-  alphaMap: simpleShadow,
-}))
-shadowPlane.rotateX(-Math.PI / 2)
-shadowPlane.position.y = plane.position.y + 0.01
-
-scene.add(sphere, plane, shadowPlane)
+scene.add(sphere, plane)
 
 // liight
 const ambientLight = new THREE.AmbientLight('#ffffff', 0.4)
