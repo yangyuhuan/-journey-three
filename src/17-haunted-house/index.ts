@@ -38,6 +38,7 @@ brickAmbientOcclusionTexture.repeat.set(3, 3)
 brickHeightTexture.repeat.set(3, 3)
 brickNormalTexture.repeat.set(3, 3)
 brickRoughnessTexture.repeat.set(3, 3)
+
 brickColorTexture.wrapS = THREE.RepeatWrapping
 brickAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
 brickHeightTexture.wrapS = THREE.RepeatWrapping
@@ -104,7 +105,7 @@ scene.add(house)
 
 // walls
 const walls = new THREE.Mesh(
-  new THREE.BoxGeometry(4, 2.5, 4),
+  new THREE.BoxGeometry(4, 2.5, 4, 200, 200),
   new THREE.MeshStandardMaterial({
     map: brickColorTexture,
     aoMap: brickAmbientOcclusionTexture,
@@ -158,7 +159,7 @@ house.add(door)
 // Bushes
 const bushGeometry = new THREE.SphereBufferGeometry(1, 16, 16)
 const bushMaterial = new THREE.MeshStandardMaterial({
-  color: '#89c854',
+  color: '#827717',
 })
 const bush1 = new THREE.Mesh(bushGeometry, bushMaterial)
 bush1.scale.set(0.5, 0.5, 0.5)
@@ -196,6 +197,7 @@ for (let i = 0; i < 50; i += 1) {
   grave.position.set(x, 0.3, z)
   grave.rotation.z = (Math.random() - 0.5) * 0.4
   grave.rotation.y = (Math.random() - 0.5) * 0.4
+  grave.castShadow = true
   graves.add(grave)
 }
 
@@ -205,11 +207,17 @@ scene.add(ambientLight)
 
 const directionalLight = new THREE.DirectionalLight('#b9d5ff', 0.12)
 directionalLight.position.set(1, 0.75, 0)
+directionalLight.shadow.mapSize.width = 256
+directionalLight.shadow.mapSize.height = 256
+directionalLight.shadow.camera.far = 15
 scene.add(directionalLight)
 
 // Door light
 const doorLight = new THREE.PointLight('#ff7d46', 1, 7)
 doorLight.position.set(0, 2.2, 2.7)
+doorLight.shadow.mapSize.width = 256
+doorLight.shadow.mapSize.height = 256
+doorLight.shadow.camera.far = 7
 house.add(doorLight)
 
 /**
@@ -248,12 +256,12 @@ bush4.castShadow = true
 plane.receiveShadow = true
 
 // fog
-const fog = new THREE.Fog('#262837', 1, 15)
+const fog = new THREE.Fog('#262837', 1, 20)
 scene.fog = fog
 
 // camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(4, 2, 4)
+camera.position.set(7, 1.8, 8)
 
 // controls
 const controls = new OrbitControls(camera, canvas)
@@ -265,13 +273,41 @@ controls.minDistance = 4
 controls.zoomSpeed = 0.3
 controls.maxPolarAngle = 87 * (Math.PI / 180)
 
+// sound
+// 创建一个audioListener 并将其添加到camera中
+const listener = new THREE.AudioListener()
+camera.add(listener)
+
+// 创建一个全局的audio源
+const sound = new THREE.Audio(listener)
+
+// 加载一个sound并将其设置为audio 对象的缓冲区
+const audioLoader = new THREE.AudioLoader()
+audioLoader.load('../assets/sounds/ghost.mp3', (buffer) => {
+  sound.setBuffer(buffer)
+  sound.setLoop(true)
+  sound.setVolume(0.5)
+  sound.play()
+})
+
+const ghostSound = new THREE.PositionalAudio(listener)
+const ghostSoundLoader = new THREE.AudioLoader()
+ghostSoundLoader.load('../assets/sounds/horror-ghost-14.wav', (buffer) => {
+  ghostSound.setBuffer(buffer)
+  ghostSound.setRefDistance(20)
+  ghostSound.setLoop(true)
+  ghostSound.setVolume(0.6)
+  ghostSound.play()
+})
+ghost2.add(ghostSound)
+
 // renderer
 const renderer = new THREE.WebGLRenderer({
   canvas,
+  antialias: true,
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setClearColor('#262837')
-renderer.render(scene, camera)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 renderer.shadowMap.enabled = true
@@ -281,8 +317,26 @@ listenResize(sizes, camera, renderer)
 dbClkfullScreen(document.body)
 
 // tick
+const clock = new THREE.Clock()
 const tick = () => {
   stats.begin()
+
+  const elapsedTime = clock.getElapsedTime()
+
+  const ghost1Angle = elapsedTime * 0.5
+  ghost1.position.x = Math.cos(ghost1Angle) * 4
+  ghost1.position.z = Math.sin(ghost1Angle) * 4
+  ghost1.position.y = Math.sin(elapsedTime * 3)
+
+  const ghost2Angle = -elapsedTime * 0.32
+  ghost2.position.x = Math.cos(ghost2Angle) * 5
+  ghost2.position.z = Math.sin(ghost2Angle) * 5
+  ghost2.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5)
+
+  const ghost3Angle = -elapsedTime * 0.18
+  ghost3.position.x = Math.cos(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.32))
+  ghost3.position.z = Math.sin(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.5))
+  ghost3.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5)
   controls.update()
 
   // render
@@ -292,3 +346,26 @@ const tick = () => {
 }
 
 tick()
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI()
+
+gui.add(controls, 'autoRotate')
+gui.add(controls, 'autoRotateSpeed', 0.1, 10, 0.01)
+
+const guiObj = {
+  soundOff() {
+    sound.pause()
+    // soundPositional.pause()
+    ghostSound.pause()
+  },
+  soundOn() {
+    sound.play()
+    // soundPositional.play()
+    ghostSound.play()
+  },
+}
+gui.add(guiObj, 'soundOff')
+gui.add(guiObj, 'soundOn')
